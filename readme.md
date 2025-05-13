@@ -6,7 +6,7 @@ Basic Shell functionality
 Custom commands
 
 ## Planned later on
-Actually making a Terminal, so far only the Shell is worked only
+Actually making a Terminal, so far only the Shell is worked on
 
 
 
