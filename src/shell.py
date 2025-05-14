@@ -3,7 +3,6 @@ import os, sys
 from cmd2 import Cmd, with_argparser
 from pathlib import Path
 import argparse
-import shutil
 # base, often reused flags
 base_parser = argparse.ArgumentParser(add_help=False)
 base_parser.add_argument('-f', '--force', action='store_true', help='Suppress errors and force the operation')
@@ -41,6 +40,16 @@ class ZenShell(Cmd):
 
     def do_exit(self, _):
         return True
+
+    def do_cat(self, filename):
+        path = Path(filename.strip())
+        try:
+            content = path.read_text(encoding="utf-8")
+            self.poutput(content)
+        except FileNotFoundError:
+            self.perror(f"cat: No such file: {filename}")
+
+
 
 
 
