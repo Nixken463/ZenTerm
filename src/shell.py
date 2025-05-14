@@ -35,8 +35,18 @@ class ZenShell(Cmd):
 
     def do_pwd(self, _):
         print(os.getcwd())
+# add option for passing a dir, like ls src or ls ZenTerm/src
+    def do_ls(self, _):
+        try:
+            entries =  []
+            path = os.getcwd()
+            for entry in sorted(os.listdir()):
+                name = entry + "/" if os.path.isdir(path + "/" + entry) else entry
+                entries.append(name)
 
+            print(" ".join(entries))
 
-
+        except Exception as e:
+            print(f"Error: {e}")
 if __name__ == "__main__":
     ZenShell().cmdloop()
