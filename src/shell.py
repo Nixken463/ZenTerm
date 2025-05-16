@@ -3,11 +3,13 @@ import os, sys
 from cmd2 import Cmd, with_argparser
 from pathlib import Path
 import argparse
+import shutil
 # base, often reused flags
 base_parser = argparse.ArgumentParser(add_help=False)
 base_parser.add_argument('-f', '--force', action='store_true', help='Suppress errors and force the operation')
 base_parser.add_argument('-i', '--interactive', action='store_true', help='Prompt for confirmation before each action')
 base_parser.add_argument('-v', '--verbose', action='store_true', help='Provide detailed output during execution')
+
 class ZenShell(Cmd):
     def __init__(self):
         super().__init__()
@@ -22,7 +24,7 @@ class ZenShell(Cmd):
         """) 
     @property
     def prompt(self):
-        return f"{Path.cwd().name} "
+        return f"-> {Path.cwd().name} "
 
 
     def do_cd(self, path):
@@ -41,20 +43,100 @@ class ZenShell(Cmd):
     def do_exit(self, _):
         return True
 
-    def do_cat(self, filename):
-        path = Path(filename.strip())
+
+    def do_mv(self, arg):
+        parser = argparse.ArgumentParser(parents=[base_parser])
+        parser.add_argument('source', help="Path to the source file")
+        parser.add_argument('destination', help="Path to the destination")
         try:
-            content = path.read_text(encoding="utf-8")
-            self.poutput(content)
+            parse = parser.parse_args(arg.split())
+        except SystemExit:
+            return
+        source_path = Path(parse.source)
+        destination_path = Path(parse.destination)
+
+        try:
+            if source_path.exists():
+                if destination_path.exists() and destination_path.is_dir():
+                    shutil.move(source_path, destination_path)
+                else:
+                    self.perror(f"mv: No such directory: {destination_path}")
+            else:
+                self.perror(f"mv: No such file or directory: {source_path}")
+        except PermissionError:
+            self.perror(f"mv: Permission denied: {destination_path}")
         except FileNotFoundError:
-            self.perror(f"cat: No such file: {filename}")
+            self.perror(f"mv: No such file or directory: {source_path}")
+
+
+    def do_cp(self, arg):
+        parser = argparse.ArgumentParser(parents=[base_parser])
+        parser.add_argument('source', help="Path to the source file")
+        parser.add_argument('destination', help="Path to the destination")
+        try:
+            parse = parser.parse_args(arg.split())
+        except SystemExit:
+            return
+        path = Path(parse.source)
+        try:
+            if Path(path).exists():
+                pass
+        except FileNotFoundError:
+            self.perror(f"cp: No such file or directory: {path}")
+
+    def do_cat(self, path):
+        path = Path(path.strip())
+
+        try:
+            if Path(path).is_dir():
+                self.perror(f"cat: {path.name} is a directory")
+                return
+            else:
+                content = path.read_text(encoding="utf-8", errors="strict")
+                self.poutput(content)
+        except FileNotFoundError:
+            self.perror(f"cat: No such file: {path}")
+
+        except PermissionError:
+            self.perror(f"cat: Permission denied: {path}")
+
+        except UnicodeDecodeError:
+            try:
+                content = path.read_text(encoding="utf-8", errors="replace")
+                self.poutput(content)            
+                self.perror(f"cat: Warning — invalid UTF‑8 sequences in {path}, showing � for invalid bytes")
+            except UnicodeDecodeError:
+                try:
+                    content = path.read_text(encoding="iso-8859-1", errors="replace")
+                    self.poutput(content)
+                    self.perror(f"cat: Decoded {path} with iso-8859-1 (fallback)")
+                except  Exception:
+                    self.perror(f"cat: Unable to decode {path}")
 
 
 
+    def do_echo(self, call):
+        try:
+            self.poutput(call)
+        except PermissionError:
+            self.perror(f"echo: Permission denied")
+        except Exception as e:
+            self.perror(f"echo: Error: {e}")
 
 
+    def do_mkdir(self, path):
+        path = Path(path)
+        try: 
+            path.mkdir(parents=True, exist_ok=False)
+        except PermissionError:
+            self.perror(f"mkdir: Permission denied: {path}")
+        except FileExistsError:
+            self.perror(f"mkdir: Directory already exists: {path}")
+        except Exception as e:
+            self.perror(f"mkdir: Error creating directory: {e}")
+        
     def do_rm(self, arg):
-        parser = argparse.ArgumentParser(parents=[base_parser], add_help=False)
+        parser = argparse.ArgumentParser(parents=[base_parser])
         parser.add_argument('-r', '--recursive', action='store_true', help='Recursively delete directories')
         parser.add_argument('targets', nargs='+', help='Files or directories to remove')
         try:
@@ -121,11 +203,11 @@ class ZenShell(Cmd):
     
 
 
-    def do_ls(self, directory):
+    def do_ls(self,path):
         try:
             entries =  []
             path = Path.cwd()
-            path = Path(directory).expanduser().resolve()
+            path = Path(path).expanduser().resolve()
             for entry in sorted(path.iterdir()):
 
                 name = f"{entry.name}/" if entry.is_dir() else entry.name
@@ -134,7 +216,7 @@ class ZenShell(Cmd):
             self.poutput(" ".join(entries))
 
         except FileNotFoundError:
-            self.perror(f"ls: No such directory: {directory}")
+            self.perror(f"ls: No such directory: {path}")
 
         except Exception as e:
             self.perror(f"Error: {e}")
