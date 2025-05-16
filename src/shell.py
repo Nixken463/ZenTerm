@@ -57,7 +57,7 @@ class ZenShell(Cmd):
 
         try:
             if source_path.exists():
-                if destination_path.exists() and destination_path.is_dir():
+                if destination_path.parent.exists() and destination_path.parent.is_dir():
                     shutil.move(source_path, destination_path)
                 else:
                     self.perror(f"mv: No such directory: {destination_path}")
@@ -77,13 +77,21 @@ class ZenShell(Cmd):
             parse = parser.parse_args(arg.split())
         except SystemExit:
             return
-        path = Path(parse.source)
+        source_path = Path(parse.source)
+        destination_path = Path(parse.destination)
         try:
-            if Path(path).exists():
-                pass
+            if source_path.exists():
+                if destination_path.parent.exists() and destination_path.parent.is_dir():
+                    shutil.copy2(source_path, destination_path)
+                else:
+                    self.perror(f"cp: No such directory: {destination_path.parent}")
+            
+        except PermissionError:
+            self.perror(f"cp: Permissiond denied: {destination_path.parent}")
         except FileNotFoundError:
-            self.perror(f"cp: No such file or directory: {path}")
-
+            self.perror(f"cp: No such file or directory: {source_path}")
+        except Exception as e:
+            self.perror(f"cp: Error: {e}")
     def do_cat(self, path):
         path = Path(path.strip())
 
@@ -124,10 +132,25 @@ class ZenShell(Cmd):
             self.perror(f"echo: Error: {e}")
 
 
-    def do_mkdir(self, path):
-        path = Path(path)
+    def do_mkdir(self, arg):
+        parser = argparse.ArgumentParser(parents=[base_parser])
+        parser.add_argument('-p', '--parents', action="store_true", help="create parent directory if not existing")
+        parser.add_argument('path', default=".", help="Location and name of the directory to create")
+
+        try:
+            parse = parser.parse_args(arg.split())
+        except SystemExit:
+            return
+
+
+        path = Path(parse.path)
+        
         try: 
-            path.mkdir(parents=True, exist_ok=False)
+            if parse.parents:
+                path.mkdir(parents=True, exist_ok=False)
+            else:
+                path.mkdir(parents=False, exist_ok=False)
+
         except PermissionError:
             self.perror(f"mkdir: Permission denied: {path}")
         except FileExistsError:
@@ -203,11 +226,16 @@ class ZenShell(Cmd):
     
 
 
-    def do_ls(self,path):
+    def do_ls(self,arg):
+        parser = argparse.ArgumentParser(parents=[base_parser])
+        parser.add_argument('path', nargs="?", default=".", help="Path to the ls location")
+        try:
+            parse = parser.parse_args(arg.split())
+        except SystemExit:
+            return
         try:
             entries =  []
-            path = Path.cwd()
-            path = Path(path).expanduser().resolve()
+            path = Path(parse.path)
             for entry in sorted(path.iterdir()):
 
                 name = f"{entry.name}/" if entry.is_dir() else entry.name
@@ -216,7 +244,7 @@ class ZenShell(Cmd):
             self.poutput(" ".join(entries))
 
         except FileNotFoundError:
-            self.perror(f"ls: No such directory: {path}")
+            self.perror(f"ls: No such directory: {parse.path}")
 
         except Exception as e:
             self.perror(f"Error: {e}")
