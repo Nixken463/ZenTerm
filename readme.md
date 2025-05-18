@@ -15,10 +15,10 @@ Basic commands and flag handling
 Currently available commands:
 
 * `rm -r -f -v -i`
-* `mkdir -p -f -v -i`
+* `mkdir -p -r -f -v -i`
 * `ls -a -f`
 * `mv -f -v -i`
-* `cp -f -v -i`
+* `cp -f -r -v -i`
 * `touch -f -v -i`
 * `cat -f -v`
 * `echo -f`
@@ -43,7 +43,7 @@ Currently available commands:
   
 3.  **Install dependencies:**
 4.  ```
-    pip install cmd2
+    pip install -r requirements.txt 
     ```
 
 5.  **Run ZenTerm:**
