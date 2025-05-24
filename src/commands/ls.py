@@ -4,7 +4,10 @@ import stat
 import os
 from datetime import datetime
 import platform
-import pwd, grp
+if platform.system() != "Windows":
+    import pwd
+    import grp
+
 
 def execute_ls(self,args: Namespace) -> None:
         try:
