@@ -43,7 +43,7 @@ Currently available commands:
   
 3.  **Install dependencies:**
 4.  ```
-    pip install -r requirements.txt 
+    pip install .
     ```
 
 5.  **Run ZenTerm:**
