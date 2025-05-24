@@ -5,6 +5,6 @@ def execute_echo(self, args: Namespace) -> None:
         try:
             self.poutput(content)
         except PermissionError:
-            self._report_error(f"echo: Permission denied: {content}",args)
+            self.report_error(f"echo: Permission denied: {content}",args)
         except Exception as e:
-            self._report_error(f"echo: Error: {e}",args)
+            self.report_error(f"echo: Error: {e}",args)

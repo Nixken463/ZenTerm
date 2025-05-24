@@ -14,18 +14,18 @@ ZenTerm is a Shell & a Terminal written in Python.
 Basic commands and flag handling
 Currently available commands:
 
-* `rm -r -f -v -i`
-* `mkdir -p -r -f -v -i`
-* `ls -a -f`
-* `mv -f -v -i`
-* `cp -f -r -v -i`
-* `touch -f -v -i`
-* `cat -f -v`
-* `echo -f`
-* `cd -f`
-* `clear` (no flags)
-* `exit` (no flags)
-* `pwd` (no flags)
+* `rm -r -f -v -i -d -h`
+* `mkdir -p -r -f -v -i -h`
+* `ls -a -f -l -r -s -S -h`
+* `mv -f -v -i -h`
+* `cp -f -r -v -i -h`
+* `touch -f -v -i -h`
+* `cat -f -v -h`
+* `echo -f -h`
+* `cd -f -h`
+* `clear -h`
+* `exit -h`
+* `pwd -h`
 
 
 
@@ -49,7 +49,7 @@ Currently available commands:
 5.  **Run ZenTerm:**
     
     ```bash
-    python src/shell.py
+    python src/ZenShell.py
     ```
 
 ## Currently in work

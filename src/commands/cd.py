@@ -8,8 +8,8 @@ def execute_cd(self, args: Namespace)-> None:
         dir = Path(path).resolve(strict=True)
         os.chdir(dir)
     except FileNotFoundError:
-        self._report_error(f"cd: No such directory: {path}",args)
+        self.report_error(f"cd: No such directory: {path}",args)
     except NotADirectoryError:
-        self._report_error(f"cd: Not a directory: {path}",args)
+        self.report_error(f"cd: Not a directory: {path}",args)
     except PermissionError:
-        self._report_error(f"cd: Permission denied: {path}",args)
+        self.report_error(f"cd: Permission denied: {path}",args)

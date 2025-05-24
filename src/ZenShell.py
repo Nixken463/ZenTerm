@@ -15,9 +15,9 @@ class ZenShell(Cmd):
     def __init__(self):
         super().__init__()
         self.stdout = sys.stdout
-        self._interactive = types.MethodType(helpers.interactive, self)
-        self._report_error = types.MethodType(helpers.report_error, self)
-        self._verbose = types.MethodType(helpers.verbose, self)
+        self.interactive = types.MethodType(helpers.interactive, self)
+        self.report_error = types.MethodType(helpers.report_error, self)
+        self.verbose = types.MethodType(helpers.verbose, self)
         
         self.poutput("""
         ███████╗███████╗███╗░░██╗████████╗███████╗██████╗░███╗░░░███╗
@@ -102,7 +102,7 @@ class ZenShell(Cmd):
     @with_argparser(parser.rm_parser) 
     def do_rm(self, args: Namespace) -> None:
         """
-        Remove files or directories. Supports: -f -i -v -r -h
+        Remove files or directories. Supports: -f -i -v -r -d -h
         """
         commands.execute_rm(self, args)
 
@@ -128,7 +128,7 @@ class ZenShell(Cmd):
     @with_argparser(parser.ls_parser)
     def do_ls(self,args: Namespace) -> None:
         """
-        List contents of a directory. Supports: -f -a -h
+        List contents of a directory. Supports: -f -a -l -h
         """ 
         commands.execute_ls(self,args)
 
